@@ -36,7 +36,7 @@ public class BookRepository {
     }
 
     public List<Map<String, String>> getBooksByMostFrequentChar(Character character) {
-        String sql = "select author, sum(distinct c) as sum from " +
+        String sql = "select author, sum(c) as sum from " +
                 "(select author, (select  count(*)  FROM regexp_matches(lower(book.title), ?, 'g')) as c" +
                 " from book group by author, title) as acS where c > 0 group by author order by sum DESC limit 10;";
         return jdbcTemplate.query(sql, (ResultSet resultSet, int rowNum)
