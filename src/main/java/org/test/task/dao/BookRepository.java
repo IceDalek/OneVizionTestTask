@@ -44,9 +44,9 @@ public class BookRepository {
 
     public Book save(Book book) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String updateQuery = "INSERT INTO book(id, title,author,description) VALUES(default, ?, ?, ?);";
+        String insertQuery = "INSERT INTO book(id, title,author,description) VALUES(default, ?, ?, ?);";
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(updateQuery,
+            PreparedStatement ps = connection.prepareStatement(insertQuery,
                     Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, book.getTitle());
             ps.setString(2, book.getAuthor());
