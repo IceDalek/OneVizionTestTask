@@ -20,12 +20,10 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -65,14 +63,13 @@ public class BookControllerTest {
     }
 
     @Test
-    void getAllByAuthor() throws Exception {
-        String response = this.mockMvc.perform(get("/api/books/byAuthor?author=L. Tolstoy")).andReturn().getResponse().getContentAsString();
-        List<Book> books = objectMapper.readValue(response, new TypeReference<List<Book>>() {
+    void getGroupByAuthor() throws Exception {
+        String response = this.mockMvc.perform(get("/api/books/byAuthor")).andReturn().getResponse().getContentAsString();
+        Map<String, List<Book>> books = objectMapper.readValue(response, new TypeReference<>() {
         });
-        assertThat(books.size(), is(2));
-        List<String> titles = books.stream().map(Book::getTitle).collect(Collectors.toList());
-        assertThat(titles.contains("War and Peace"), is(Boolean.TRUE));
-        assertThat(titles.contains("Anna Karenina"), is(Boolean.TRUE));
+        assertThat(books.get("L. Tolstoy").size(), is(2));
+        assertThat(books.get("N. Gogol").size(), is(1));
+        assertThat(books.get("F. Dostoevsky").size(), is(2));
     }
 
     @Test
@@ -82,19 +79,23 @@ public class BookControllerTest {
         book.setDescription("test");
         book.setTitle("test");
         String json = objectMapper.writeValueAsString(book);
-        this.mockMvc.perform(post("/api/books/")
+        String response = this.mockMvc.perform(post("/api/books/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json));
-        String response = this.mockMvc.perform(get("/api/books/byTitle")).andReturn().getResponse().getContentAsString();
-        List<Book> books = objectMapper.readValue(response, new TypeReference<List<Book>>() {
-        });
-        Book found = books.stream().filter(b -> b.getTitle().equalsIgnoreCase("test")).findFirst().orElseThrow(NoSuchElementException::new);
-        assertThat(found, notNullValue());
+                .content(json)).andReturn().getResponse().getContentAsString();
+        Book returnVal = objectMapper.readValue(response, Book.class);
+        assertThat(returnVal.getTitle(), is("test"));
+        assertThat(returnVal.getDescription(), is("test"));
+        assertThat(returnVal.getAuthor(), is("test"));
     }
 
     @Test
     void FindByMostFrequentCharTest() throws Exception {
-        String response = this.mockMvc.perform(get("/api/books/byMostFrequentChar?character=a")).andReturn().getResponse().getContentAsString();
+        FindByMostFreqChar("a");
+        FindByMostFreqChar("A");
+    }
+
+    private void FindByMostFreqChar(String character) throws Exception {
+        String response = this.mockMvc.perform(get("/api/books/byMostFrequentChar?character=" + character)).andReturn().getResponse().getContentAsString();
         List<Map<String, String>> books = objectMapper.readValue(response, new TypeReference<>() {
         });
         Map<String, String> expected1 = new HashMap<>();

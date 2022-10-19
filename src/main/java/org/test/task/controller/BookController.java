@@ -18,8 +18,8 @@ public class BookController {
     private BookService bookService;
 
     @PostMapping
-    public void createBook(@RequestBody CreateBookDTO createBookDTO) {
-        bookService.createBook(createBookDTO);
+    public Book createBook(@RequestBody CreateBookDTO createBookDTO) {
+        return bookService.createBook(createBookDTO);
     }
 
     @GetMapping("/byTitle")
@@ -28,8 +28,8 @@ public class BookController {
     }
 
     @GetMapping("/byAuthor")
-    public List<Book> getAllByAuthor(@RequestParam String author) {
-        return bookService.getAllByAuthor(author);
+    public Map<String, List<Book>> groupByAuthor() {
+        return bookService.groupByAuthor();
     }
 
     @GetMapping("/byMostFrequentChar")
