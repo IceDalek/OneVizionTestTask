@@ -29,7 +29,7 @@ public class BookRepository {
     private JdbcTemplate jdbcTemplate;
 
     public List<Book> getAllByTitle() {
-        return jdbcTemplate.query("select * from book ORDER BY title DESC", ROW_MAPPER);
+        return jdbcTemplate.query("select * from book order by title desc", ROW_MAPPER);
     }
 
     public Map<String, List<Book>> groupByAuthor() {
@@ -44,7 +44,7 @@ public class BookRepository {
 
     public Book save(Book book) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String insertQuery = "INSERT INTO book(id, title,author,description) VALUES(default, ?, ?, ?);";
+        String insertQuery = "insert into book(id, title,author,description) values (default, ?, ?, ?);";
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(insertQuery,
                     Statement.RETURN_GENERATED_KEYS);
@@ -58,8 +58,8 @@ public class BookRepository {
 
     public List<Map<String, String>> getBooksByMostFrequentChar(Character character) {
         String sql = "select author, sum(c) as sum from " +
-                "(select author, (select  count(*)  FROM regexp_matches(lower(book.title), lower(?), 'g')) as c" +
-                " from book group by author, title) as acS where c > 0 group by author order by sum DESC limit 10;";
+                "(select author, (select  count(*)  from regexp_matches(lower(book.title), lower(?), 'g')) as c" +
+                " from book group by author, title) as acS where c > 0 group by author order by sum desc limit 10;";
         return jdbcTemplate.query(sql, (ResultSet resultSet, int rowNum)
                 -> {
             LinkedHashMap<String, String> ret = new LinkedHashMap<>();
